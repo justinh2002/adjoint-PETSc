@@ -32,6 +32,7 @@ project(adjoint_petsc
   LANGUAGES CXX)
 
 include(CTest)
+include(FindPkgConfig)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -42,7 +43,11 @@ set(PETSc_DIR     Not_Defined CACHE PATH "Path to petsc")
 option(BUILD_EXAMPLES    "Build examples"               ON)
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
+list(APPEND CMAKE_PREFIX_PATH "${PETSc_DIR}")
+
 find_package(CoDiPack CONFIG REQUIRED)
+find_package(MPI REQUIRED)
+pkg_search_module(PETSc REQUIRED IMPORTED_TARGET GLOBAL PETSc)
 
 add_library(adjoint_petsc
   src/adjoint_petsc/ksp.cpp
@@ -70,12 +75,11 @@ target_sources(adjoint_petsc
       include/adjoint_petsc/util/wrapper_array.hpp
 )
 
-target_include_directories(adjoint_petsc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${PETSc_DIR}/include)
+target_include_directories(adjoint_petsc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options    (adjoint_petsc PRIVATE -Wall -pedantic -Wextra -Werror)
 
 target_link_libraries(adjoint_petsc PUBLIC CoDiPack)
-target_link_libraries(adjoint_petsc INTERFACE petsc mpi)
-target_link_directories(adjoint_petsc INTERFACE ${PETSc_DIR}/lib)
+target_link_libraries(adjoint_petsc PUBLIC PkgConfig::PETSc MPI::MPI_CXX)
 
 install(TARGETS adjoint_petsc FILE_SET api)
 
