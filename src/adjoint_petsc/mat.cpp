@@ -103,7 +103,7 @@ struct CommunicationData {
       request_number_for_rank_recv.resize(mpi_size);
       MPI_Alltoall(request_number_for_rank_send.data(), 1, MPI_INTEGER, request_number_for_rank_recv.data(), 1, MPI_INTEGER, comm);
 
-      // Step 2: Communicate requesteed values to ranks
+      // Step 2: Communicate requested values to ranks
       // step 2.1: Compute the total size and allocate the send/recv displs
       total_request_send = 0;
       total_request_recv = 0;
@@ -205,6 +205,15 @@ struct ADData_MatSetValues {
 
       std::sort(row_col_data_unique.begin(), row_col_data_unique.end());
       auto unique_end = std::unique(row_col_data_unique.begin(), row_col_data_unique.end());
+
+      // Sanity check: Adjoint is not well formed if a value is set by multiple processors.
+      if(INSERT_VALUES == mode) {
+        if(unique_end != row_col_data_unique.end()) {
+          AP_EXCEPTION("Value is set from multiple processors. Adjoint is not well defined.");
+        }
+      }
+
+      // Delete non unqiue data
       row_col_data_unique.erase(unique_end, row_col_data_unique.end());
 
       int lhs_out_pos = 0;

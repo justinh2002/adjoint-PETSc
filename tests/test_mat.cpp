@@ -78,9 +78,10 @@ TEST_F(MatSetup, SetValues) {
 TEST_F(MatSetup, SetValuesInsert) {
   std::array<PetscInt, 3> rows = {0, mpi_rank * ENTRIES_PER_RANK + 1, mpi_rank * ENTRIES_PER_RANK + 1};
   std::array<PetscInt, 3> cols = {0, mpi_rank * ENTRIES_PER_RANK + 1, mpi_rank * ENTRIES_PER_RANK + 1};
-  std::array<adjoint_petsc::Number, 4> values = {s[0], s[1], s[2]};
+  std::array<adjoint_petsc::Number, 3> values = {s[0], s[1], s[2]};
 
-  for(int i = 0;i < 3; i += 1) {
+  int start = mpi_rank == 0 ? 0 : 1; // Only set first value from first rank
+  for(int i = start;i < 3; i += 1) {
     PetscCallVoid(MatSetValues(mat[0], 1, &rows[i], 1, &cols[i], &values[i], INSERT_VALUES));
   }
 
@@ -92,7 +93,7 @@ TEST_F(MatSetup, SetValuesInsert) {
     tape->registerOutput(value);
 
     if(0 == row && col == 0) {
-      EXPECT_EQ(value.getValue(), 11.0);
+      EXPECT_EQ(value.getValue(), 1.0);
       value.setGradient(100 + 10 * mpi_rank);
     } else if(1 == row % ENTRIES_PER_RANK) {
       EXPECT_EQ(value.getValue(), mpi_rank * 10 + 3);
@@ -105,7 +106,7 @@ TEST_F(MatSetup, SetValuesInsert) {
 
   evaluateTape();
 
-  EXPECT_EQ(s[0].getGradient(), 100.0); // Adjoint from first rank. Distributed to all, since the setting of the value is a race condition.
+  EXPECT_EQ(s[0].getGradient(), mpi_rank == 0 ? 100.0 : 0.0); // Adjoint from first rank. Distributed to all, since the setting of the value is a race condition.
   EXPECT_EQ(s[1].getGradient(), 0); // Overwritten
   EXPECT_EQ(s[2].getGradient(), 1000.0 + 10 * mpi_rank); // Adjoint from own rank.
 }
