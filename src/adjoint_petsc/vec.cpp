@@ -32,6 +32,7 @@
 
 #include "impl/ad_vec_data.h"
 #include "util/addata_helper.hpp"
+#include "util/debug_output.hpp"
 #include "util/exception.hpp"
 #include "util/vec_iterator_util.hpp"
 
@@ -923,7 +924,7 @@ PetscErrorCode ADVecDebugOutputImpl(Vec vec_v, ADVecData* vec_i, std::string m, 
     vec_size = vi->getVectorSize();
   }
 
-  if(rank == 0) {
+  if(rank == 0 || ADPetscOptionsGetDebugOutputObjInfoOnAllRanks()) {
     if(forward) {
       out << m << " forward vector id: " << id << std::endl;
     } else {
@@ -945,7 +946,7 @@ PetscErrorCode ADVecDebugOutputImpl(Vec vec_v, ADVecData* vec_i, std::string m, 
           (void)row;
           out << value;
           if(ADPetscOptionsGetDebugOutputIdentifiers()) {
-            out << "(" << id << ")";
+            out << "(" << debugOutputId(id) << ")";
           }
           out << "\n";
         };

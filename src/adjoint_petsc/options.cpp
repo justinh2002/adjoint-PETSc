@@ -32,24 +32,30 @@
 
 AP_NAMESPACE_START
 struct ADPetscOptions {
-  bool          debug_output_primal      = false;
-  bool          debug_output_reverse     = true;
-  bool          debug_output_identifiers = true;
-  int           debug_output_precission  = 12;
-  std::ostream* debug_output_stream      = &std::cerr;
+  bool          debug_abbriviate_identifiers       = false;
+  bool          debug_output_primal                = false;
+  bool          debug_output_reverse               = true;
+  bool          debug_output_identifiers           = true;
+  bool          debug_output_obj_info_on_all_ranks = false;
+  int           debug_output_precission            = 12;
+  std::ostream* debug_output_stream                = &std::cerr;
 };
 
 ADPetscOptions ad_gobal_options = {};
 
+bool          ADPetscOptionsGetDebugAbbreviateIdentifiers() { return ad_gobal_options.debug_abbriviate_identifiers; }
 bool          ADPetscOptionsGetDebugOutputPrimal() { return ad_gobal_options.debug_output_primal; }
 bool          ADPetscOptionsGetDebugOutputReverse() { return ad_gobal_options.debug_output_reverse; }
 bool          ADPetscOptionsGetDebugOutputIdentifiers() { return ad_gobal_options.debug_output_identifiers; }
+bool          ADPetscOptionsGetDebugOutputObjInfoOnAllRanks() { return ad_gobal_options.debug_output_obj_info_on_all_ranks; }
 int           ADPetscOptionsGetDebugOutputPrecission() { return ad_gobal_options.debug_output_precission; }
 std::ostream& ADPetscOptionsGetDebugOutputStream() { return *ad_gobal_options.debug_output_stream; }
 
+void ADPetscOptionsSetDebugAbbreviateIdentifiers(bool value) { ad_gobal_options.debug_abbriviate_identifiers = value; }
 void ADPetscOptionsSetDebugOutputPrimal(bool value) { ad_gobal_options.debug_output_primal = value; }
 void ADPetscOptionsSetDebugOutputReverse(bool value) { ad_gobal_options.debug_output_reverse = value; }
 void ADPetscOptionsSetDebugOutputIdentifiers(bool value) { ad_gobal_options.debug_output_identifiers = value; }
+void ADPetscOptionsSetDebugOutputObjInfoOnAllRanks(bool value) { ad_gobal_options.debug_output_obj_info_on_all_ranks = value; }
 void ADPetscOptionsSetDebugOutputPrecission(int value) { ad_gobal_options.debug_output_precission = value; }
 void ADPetscOptionsSetDebugOutputStream(std::ostream& value) { ad_gobal_options.debug_output_stream = &value; }
 

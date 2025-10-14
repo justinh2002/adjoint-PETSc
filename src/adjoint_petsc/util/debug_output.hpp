@@ -28,26 +28,22 @@
 
 #pragma once
 
-#include <petscsys.h>
-
-#include "util/base.hpp"
+#include <adjoint_petsc/options.h>
+#include <adjoint_petsc/util/base.hpp>
+#include <adjoint_petsc/util/codi_def.hpp>
 
 AP_NAMESPACE_START
 
-bool          ADPetscOptionsGetDebugAbbreviateIdentifiers();
-bool          ADPetscOptionsGetDebugOutputPrimal();
-bool          ADPetscOptionsGetDebugOutputReverse();
-bool          ADPetscOptionsGetDebugOutputIdentifiers();
-bool          ADPetscOptionsGetDebugOutputObjInfoOnAllRanks();
-int           ADPetscOptionsGetDebugOutputPrecission();
-std::ostream& ADPetscOptionsGetDebugOutputStream();
-
-void ADPetscOptionsSetDebugAbbreviateIdentifiers(bool value);
-void ADPetscOptionsSetDebugOutputPrimal(bool value);
-void ADPetscOptionsSetDebugOutputReverse(bool value);
-void ADPetscOptionsSetDebugOutputIdentifiers(bool value);
-void ADPetscOptionsSetDebugOutputObjInfoOnAllRanks(bool value);
-void ADPetscOptionsSetDebugOutputPrecission(int value);
-void ADPetscOptionsSetDebugOutputStream(std::ostream& value);
+inline std::string debugOutputId(Identifier& id) {
+  if(adjoint_petsc::ADPetscOptionsGetDebugAbbreviateIdentifiers()) {
+    if (0 == id) {
+      return "p";
+    } else {
+      return "a";
+    }
+  } else {
+    return std::to_string(id);
+  }
+}
 
 AP_NAMESPACE_END

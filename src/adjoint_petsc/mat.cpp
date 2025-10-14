@@ -31,6 +31,7 @@
 #include <adjoint_petsc/util/petsc_missing.h>
 
 #include "util/addata_helper.hpp"
+#include "util/debug_output.hpp"
 #include "util/exception.hpp"
 #include "util/mat_iterator_util.hpp"
 #include "util/vec_iterator_util.hpp"
@@ -881,7 +882,7 @@ struct MatrixEntry {
 
   void print(std::ostream& out) {
     if(ADPetscOptionsGetDebugOutputIdentifiers()) {
-      out << row << " " << col << " " << value << "(" << id << ")\n";
+      out << row << " " << col << " " << value << "(" << debugOutputId(id) << ")\n";
     } else {
       out << row << " " << col << " " << value << "\n";
     }
@@ -912,7 +913,7 @@ PetscErrorCode ADMatDebugOutputImpl(Mat mat_v, ADMatData* mat_i, std::string m, 
     vec_size = vi->getVectorSize();
   }
 
-  if(rank == 0) {
+  if(rank == 0 || ADPetscOptionsGetDebugOutputObjInfoOnAllRanks()) {
     if(forward) {
       out << m << " forward matrix id: " << id << std::endl;
     } else {
