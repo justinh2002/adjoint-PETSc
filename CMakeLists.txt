@@ -32,7 +32,7 @@ project(adjoint_petsc
   LANGUAGES CXX)
 
 include(CTest)
-include(FindPkgConfig)
+find_package(PkgConfig REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
