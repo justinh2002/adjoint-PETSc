@@ -136,9 +136,9 @@ struct ADData_SetValues {
     VecAssemblyBegin(activity_vector);
     VecAssemblyEnd(activity_vector);
 
-    Real active_sum;
-    VecSum(activity_vector, &active_sum);
-    bool active = tape.isActive() && 0.0 != active_sum;
+    Real active_max;
+    VecMax(activity_vector, NULL, &active_max);
+    bool active = tape.isActive() && 0.0 != active_max;
 
     if(active) {
       // Sanity check: All vectors have the same insert mode.
@@ -161,21 +161,11 @@ struct ADData_SetValues {
 
       // Sanity check: Adjoint is not well formed if a value is set by multiple processors.
       if(INSERT_VALUES == mode) {
-        Real max_procs;
-
-        Vec proc_activity_vector;
-        VecDuplicate(vec->vec, &proc_activity_vector);
-        VecSet(proc_activity_vector, 0.0);
-
-        VecSetValues(proc_activity_vector, (int)lhs_in_positions.size(), lhs_in_positions.data(), values.data(), INSERT_VALUES);
-        VecAssemblyBegin(proc_activity_vector);
-        VecAssemblyEnd(proc_activity_vector);
-        VecMax(proc_activity_vector, NULL, &max_procs);
-        if ( 1 < max_procs) {
+        if ( 1.0 < active_max) {
           AP_EXCEPTION("Value is set from multiple processors. Adjoint is not well defined.");
         }
-        VecDestroy(&proc_activity_vector);
       }
+
       int i = 0;
       auto func = [&](PetscInt AP_U(row), Real& value_a, Wrapper& value_vec) {
         if(0 != value_a) {
