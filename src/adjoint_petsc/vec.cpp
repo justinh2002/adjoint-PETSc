@@ -141,6 +141,24 @@ struct ADData_SetValues {
     bool active = tape.isActive() && 0.0 != active_sum;
 
     if(active) {
+      // Sanity check: All vectors have the same insert mode.
+      {
+        MPI_Comm comm;
+        PetscCallVoid(PetscObjectGetComm((PetscObject)vec->vec, &comm));
+        int global_mode = (int)mode;
+        MPI_Allreduce(MPI_IN_PLACE, &global_mode, 1, MPI_INTEGER, MPI_MAX, comm);
+
+        // Check if process did not set any values. If so, update the mode.
+        if(mode == NOT_SET_VALUES) {
+          mode = (InsertMode)global_mode;
+        }
+
+        // Check if all have the same mode.
+        if((InsertMode)global_mode != mode) {
+          AP_EXCEPTION("Vector is not set by the same mode on all processes.");
+        }
+      }
+
       // Sanity check: Adjoint is not well formed if a value is set by multiple processors.
       if(INSERT_VALUES == mode) {
         Real max_procs;
@@ -156,6 +174,7 @@ struct ADData_SetValues {
         if ( 1 < max_procs) {
           AP_EXCEPTION("Value is set from multiple processors. Adjoint is not well defined.");
         }
+        VecDestroy(&proc_activity_vector);
       }
       int i = 0;
       auto func = [&](PetscInt AP_U(row), Real& value_a, Wrapper& value_vec) {
@@ -300,7 +319,7 @@ PetscErrorCode VecAssemblyEnd  (ADVec vec) {
 
     if(nullptr == vec->transaction_data) {
       // On this process no SetValues method was called. Creeate a temporary one.
-      vec->transaction_data = new ADData_SetValues(INSERT_VALUES, vec);
+      vec->transaction_data = new ADData_SetValues(NOT_SET_VALUES, vec);
     }
 
     ADData_SetValues* data = reinterpret_cast<ADData_SetValues*>(vec->transaction_data);

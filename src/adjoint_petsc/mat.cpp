@@ -207,6 +207,24 @@ struct ADData_MatSetValues {
       std::sort(row_col_data_unique.begin(), row_col_data_unique.end());
       auto unique_end = std::unique(row_col_data_unique.begin(), row_col_data_unique.end());
 
+      // Sanity check: All matrices have the same insert mode.
+      {
+        MPI_Comm comm;
+        PetscCallVoid(PetscObjectGetComm((PetscObject)mat->mat, &comm));
+        int global_mode = (int)mode;
+        MPI_Allreduce(MPI_IN_PLACE, &global_mode, 1, MPI_INTEGER, MPI_MAX, comm);
+
+        // Check if process did not set any values. If so, update the mode.
+        if(mode == NOT_SET_VALUES) {
+          mode = (InsertMode)global_mode;
+        }
+
+        // Check if all have the same mode.
+        if((InsertMode)global_mode != mode) {
+          AP_EXCEPTION("Matrix is not set by the same mode on all processes.");
+        }
+      }
+
       // Sanity check: Adjoint is not well formed if a value is set by multiple processors.
       if(INSERT_VALUES == mode) {
         if(unique_end != row_col_data_unique.end()) {
@@ -411,7 +429,7 @@ PetscErrorCode MatAssemblyEnd(ADMat mat, MatAssemblyType type) {
   ADMatCreateADData(mat);
 
   if(nullptr == mat->transaction_data) {
-    mat->transaction_data = new ADData_MatSetValues(INSERT_VALUES);
+    mat->transaction_data = new ADData_MatSetValues(NOT_SET_VALUES);
   }
 
   ADData_MatSetValues* data = reinterpret_cast<ADData_MatSetValues*>(mat->transaction_data);
