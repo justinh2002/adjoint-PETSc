@@ -277,8 +277,8 @@ PetscErrorCode MatIterateAllEntries(Func&& func, First&& mat, Other&& ... other)
     return iterator_implementation::iterateMatAIJ(
         func,
         iterator_implementation::getUnderlyingMat(std::forward<First>(mat)),
-        iterator_implementation::MatAIJValueAccess<std::remove_cvref_t<First>>(std::forward<First>(mat)),
-        iterator_implementation::MatAIJValueAccess<std::remove_cvref_t<Other>>(std::forward<Other>(other))...
+        iterator_implementation::MatAIJValueAccess<std::remove_cv_t<std::remove_reference_t<First>>>(std::forward<First>(mat)),
+        iterator_implementation::MatAIJValueAccess<std::remove_cv_t<std::remove_reference_t<Other>>>(std::forward<Other>(other))...
       );
   }
   else if(ADMatType::ADMatSeqAIJ == type) {
@@ -286,8 +286,8 @@ PetscErrorCode MatIterateAllEntries(Func&& func, First&& mat, Other&& ... other)
         func,
         iterator_implementation::getUnderlyingMat(std::forward<First>(mat)),
         nullptr,
-        iterator_implementation::MatSeqAIJValueAccess<std::remove_cvref_t<First>>(std::forward<First>(mat)),
-        iterator_implementation::MatSeqAIJValueAccess<std::remove_cvref_t<Other>>(std::forward<Other>(other))...
+        iterator_implementation::MatSeqAIJValueAccess<std::remove_cv_t<std::remove_reference_t<First>>>(std::forward<First>(mat)),
+        iterator_implementation::MatSeqAIJValueAccess<std::remove_cv_t<std::remove_reference_t<Other>>>(std::forward<Other>(other))...
       );
   }
   else {
@@ -305,8 +305,8 @@ PetscErrorCode MatAccessValue(Func&& func, PetscInt row, PetscInt col, First&& m
         row,
         col,
         iterator_implementation::getUnderlyingMat(std::forward<First>(mat)),
-        iterator_implementation::MatAIJValueAccess<std::remove_cvref_t<First>>(std::forward<First>(mat)),
-        iterator_implementation::MatAIJValueAccess<std::remove_cvref_t<Other>>(std::forward<Other>(other))...
+        iterator_implementation::MatAIJValueAccess<std::remove_cv_t<std::remove_reference_t<First>>>(std::forward<First>(mat)),
+        iterator_implementation::MatAIJValueAccess<std::remove_cv_t<std::remove_reference_t<Other>>>(std::forward<Other>(other))...
       );
   }
   else if(ADMatType::ADMatSeqAIJ == type) {
@@ -316,8 +316,8 @@ PetscErrorCode MatAccessValue(Func&& func, PetscInt row, PetscInt col, First&& m
         col,
         iterator_implementation::getUnderlyingMat(std::forward<First>(mat)),
         nullptr,
-        iterator_implementation::MatSeqAIJValueAccess<std::remove_cvref_t<First>>(std::forward<First>(mat)),
-        iterator_implementation::MatSeqAIJValueAccess<std::remove_cvref_t<Other>>(std::forward<Other>(other))...
+        iterator_implementation::MatSeqAIJValueAccess<std::remove_cv_t<std::remove_reference_t<First>>>(std::forward<First>(mat)),
+        iterator_implementation::MatSeqAIJValueAccess<std::remove_cv_t<std::remove_reference_t<Other>>>(std::forward<Other>(other))...
       );
   }
   else {

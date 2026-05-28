@@ -154,8 +154,8 @@ PetscErrorCode VecIterateIndexSet(Func&& func, PetscInt n, PetscInt const* ix, F
         n,
         ix,
         iterator_implementation::getUnderlyingVec(std::forward<First>(vec)),
-        iterator_implementation::VecLocalValueAccess<std::remove_cvref_t<First>>(std::forward<First>(vec)),
-        iterator_implementation::VecLocalValueAccess<std::remove_cvref_t<Other>>(std::forward<Other>(other))...
+        iterator_implementation::VecLocalValueAccess<std::remove_cv_t<std::remove_reference_t<First>>>(std::forward<First>(vec)),
+        iterator_implementation::VecLocalValueAccess<std::remove_cv_t<std::remove_reference_t<Other>>>(std::forward<Other>(other))...
         );
   }
   else {
